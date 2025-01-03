@@ -2,7 +2,9 @@ import express from "express";
 import router from "./router";
 import db from "./config/db";
 import colors from "colors";
-import swaggerUi from "swagger-ui-express";
+import cors, {CorsOptions} from "cors";
+import morgan from "morgan";
+import swaggerUi, { serve } from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
 
 
@@ -22,9 +24,24 @@ connectDB();
 //Instancia de expreass
 const server = express()
 
+//Permitir peticiones de cualquier origen
+const corsOptions: CorsOptions = {
+    origin: function(origin, callback){
+        if(origin === process.env.FRONTEND_URL){
+            callback(null, true);
+        }else{
+            callback(new Error('Error de CORS'));
+        }
+
+    }
+}
+
+server.use(cors(corsOptions));
+
 //Leer datos en formularios
 server.use(express.json());
 
+server.use(morgan('dev'))
 server.use('/api/products' , router);
 
 //Docs
